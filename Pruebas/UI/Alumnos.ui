@@ -6,31 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>419</width>
-    <height>431</height>
+    <width>360</width>
+    <height>373</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>360</width>
+    <height>373</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Registrar Alumno</string>
   </property>
-  <widget class="QPushButton" name="Insertar">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>330</y>
-     <width>80</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Insertar</string>
-   </property>
-  </widget>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>50</y>
+     <y>10</y>
      <width>211</width>
      <height>281</height>
     </rect>
@@ -89,18 +82,31 @@
     </item>
    </layout>
   </widget>
-  <widget class="QPushButton" name="Ver">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>330</y>
-     <width>80</width>
-     <height>23</height>
+     <x>50</x>
+     <y>290</y>
+     <width>168</width>
+     <height>25</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Ver Tabla</string>
-   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QPushButton" name="Insertar">
+      <property name="text">
+       <string>Insertar</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="Ver">
+      <property name="text">
+       <string>Ver Tabla</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

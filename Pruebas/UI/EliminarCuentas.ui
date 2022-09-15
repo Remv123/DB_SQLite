@@ -6,14 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>360</width>
     <height>300</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Borrar Usuario</string>
+  <property name="maximumSize">
+   <size>
+    <width>360</width>
+    <height>300</height>
+   </size>
   </property>
-  <widget class="QWidget" name="">
+  <property name="windowTitle">
+   <string>Borrar Cuenta</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>50</x>
@@ -45,7 +51,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>30</x>

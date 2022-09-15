@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Jun 30 18:01:18 2022
 
-@author: rafael
-"""
 def ValidarBoleta(Boleta,Mensaje,contador):
-    if len(Boleta)!=10:
-        Mensaje+="La Boleta debe ser de 10 Caracteres\n"
+    if len(Boleta)>14:
+        Mensaje+="La Boleta del alumno excede el rango esperado\n"
         contador+=1
     return Mensaje,contador
 
@@ -33,8 +29,7 @@ def ValidarApellidos(Apellidos,Mensaje,contador):
     return Mensaje,contador
 
 def VerificarBoletaBaseDatos(Boleta,Mensaje,contador,DBconnection):
-    con=DBconnection
-    cursor=con.cursor()
+    cursor=DBconnection.cursor()
     verificar="""Select CveAlumno from Alumno where CveAlumno=?"""
     cursor.execute(verificar,(Boleta,))
     if cursor.fetchone() is None:

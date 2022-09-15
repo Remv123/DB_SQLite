@@ -4,31 +4,40 @@
 
 import sys,Mensajes,sqlite3
 from PyQt5 import QtWidgets,uic
+from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton
+from PyQt5.Qt import pyqtSignal
+
 from CustomTableView import TableViewer
 from ValidacionesGrupo import ValidarClaveGrupo
+from pysqlcipher3 import dbapi2 as sqlite
 
-class GrupoBorrar(QtWidgets.QDialog):
+class GrupoBorrar(QDialog):
+    close_signal=pyqtSignal()
+
     def __init__(self,DBconnection):
         super(GrupoBorrar,self).__init__()  
         uic.loadUi("../UI/EliminarGrupos.ui",self)
         self.con=DBconnection
-        self.input1=self.findChild(QtWidgets.QLineEdit,"Grupo")
-        self.button1=self.findChild(QtWidgets.QPushButton,"Borrar")
+        self.cursor=DBconnection.cursor()
+        self.input1=self.findChild(QLineEdit,"Grupo")
+        self.button1=self.findChild(QPushButton,"Borrar")
         self.button1.clicked.connect(self.BorrarGrupo)
-        self.button2=self.findChild(QtWidgets.QPushButton, "Ver")
+        self.button2=self.findChild(QPushButton, "Ver")
         self.button2.clicked.connect(self.VerTabla)
+        self.TV=None #TableViewer
+
        
-      
-    
     def BorrarGrupo(self):
-        cursor=self.con.cursor()
         Clave=self.input1.text()
         oracion="Delete from Grupo where CveGrupo=?"
         if self.VerificarDatos(Clave):
-            cursor.execute(oracion,(Clave,))
+            self.cursor.execute(oracion,(Clave,))
             self.con.commit()
+            self.ClearLineEdits()
             Mensajes.MostrarExitoBorrar()
-    
+    def ClearLineEdits(self):
+        for child in self.findChildren(QLineEdit):
+            child.clear()
     def VerificarDatos(self,Grupo):
         Mensaje,Errores=ValidarClaveGrupo(Grupo)
         if Errores>0:
@@ -37,14 +46,17 @@ class GrupoBorrar(QtWidgets.QDialog):
         else:
             return True
     def VerTabla(self):
-        self.TV=TableViewer("Grupo", self.con)
+        self.TV=TableViewer("Grupo", self.cursor)
         self.TV.show()
     
-    def __exit__(self):
-        self.con.close()
-
+    def closeEvent(self,event):
+        self.on_close()
+    def on_close(self):
+        if self.TV is not None:
+            self.TV.close()
+        self.close_signal.emit()
 if __name__=="__main__":
-    con=sqlite3.Connection("../DB/ESM_pruebas.db")
+    con=sqlite.Connection("../DB/ESM.db")
     app=QtWidgets.QApplication(sys.argv)
     window=GrupoBorrar(con)
     window.show()

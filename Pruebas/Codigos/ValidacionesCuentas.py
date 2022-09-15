@@ -45,13 +45,23 @@ def VerificarUsuarioCuenta(Boleta,Fecha,Mensaje,errores,DBconn): #Avisa si el al
     return Mensaje, errores
 
 def VerificarBoletaCuenta(Boleta,Mensaje,errores,DBconn):#Avisa si la boleta esta registrada en la tabla de Alumnos
-    cursor=DBconn.cursor()
+    cursor=DBconn.cursor()    
     verificar="""select Alumno.CveAlumno from Alumno where CveAlumno=?
     """
-    if len(Boleta)>10:
-        cursor.execute(verificar,(Boleta,))
-        resultado =cursor.fetchone()
-        if resultado is None:
-            Mensaje+="La boleta no esta registrada en la tabla de alumnos\n"
-            errores+=1
+    cursor.execute(verificar,(Boleta,))
+    resultado =cursor.fetchone()
+    if resultado is None:
+        Mensaje+="La boleta no esta registrada en la tabla de alumnos\n"
+        errores+=1
     return Mensaje, errores
+
+def VerificarCuentaExista(Cuenta,Mensaje,errores,DBconn):
+    cursor=DBconn.cursor()
+    verificar="select NombreCuenta from Cuenta where NombreCuenta=?"
+    cursor.execute(verificar,(Cuenta,))
+    resultado=cursor.fetchone()
+    if resultado is None:
+        Mensaje+="La cuenta no esta registrada en la tabla de cuentas de usuario\n"
+        errores+=1
+    return Mensaje,errores
+        

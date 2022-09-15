@@ -4,34 +4,68 @@
 
 import sys,Mensajes,sqlite3
 from PyQt5 import QtWidgets,uic
-from CustomTableView import TableViewer
+from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton
+from PyQt5.Qt import pyqtSignal
 
-class MateriasBorrar(QtWidgets.QDialog):
+from CustomTableView import TableViewer
+from ValidacionesMaterias import ValidarEliminacionMaterias
+
+
+class MateriasBorrar(QDialog):
+    close_signal=pyqtSignal()
+
     def __init__(self,DBconnection):
         super(MateriasBorrar,self).__init__()
         uic.loadUi("../UI/EliminarMateria.ui",self)
         self.con=DBconnection
-        self.input1=self.findChild(QtWidgets.QLineEdit,"Clave")
-        self.buttonA=self.findChild(QtWidgets.QPushButton,"Borrar")
-        self.buttonA.clicked.connect(self.BorrarMaterias)
-        self.buttonB=self.findChild(QtWidgets.QPushButton,"Ver")
-        self.buttonB.clicked.connect(self.MostrarTabla)
-        
+        self.cursor=DBconnection.cursor()
+        self.Clave=self.findChild(QLineEdit,"Clave")
+        self.buttonBorrar=self.findChild(QPushButton,"Borrar")
+        self.buttonBorrar.clicked.connect(self.BorrarMaterias)
+        self.buttonVer=self.findChild(QPushButton,"Ver")
+        self.buttonVer.clicked.connect(self.MostrarTabla)
+        self.TV=None #TableViewer
+
+   
     def BorrarMaterias(self):
-        cursor=self.con.cursor()
-        Abreviatura=self.input1.text()
+       
+        Abreviatura=self.Clave.text()
         oracion="Delete from Materias where CveMateria=?"
-        cursor.execute(oracion,(Abreviatura,))
-        self.con.commit()
-        Mensajes.MostrarExitoBorrar()
+        if self.ValidarDatos(Abreviatura):
+            self.cursor.execute(oracion,(Abreviatura,))
+            self.con.commit()
+            self.ClearLineEdits()
+            Mensajes.MostrarExitoBorrar()
+    
+    def ClearLineEdits(self):
+        for child in self.findChildren(QLineEdit):
+            child.clear()
+            
+    def ValidarDatos(self,Abreviatura):
+        mensaje=""
+        errores=0
+        if len(Abreviatura)==0:
+            mensaje+="El campo esta vacio\n"
+            errores+=1
+        mensaje,errores=ValidarEliminacionMaterias(Abreviatura, mensaje, errores, self.cursor)
+        if errores>0:
+            Mensajes.MostrarErroresBorrar(mensaje)
+            return False
+        else:
+            return True
+        
+    
 
     def MostrarTabla(self):
-        self.TV=TableViewer("Materias", self.con) 
+        self.TV=TableViewer("Materias", self.cursor) 
         self.TV.show()
           
-    def __exit__(self):
-        self.con.close()
-
+    def closeEvent(self,event):
+        self.on_close()
+    def on_close(self):
+        if self.TV is not None:
+            self.TV.close()
+        self.close_signal.emit()
 if __name__=="__main__":
     con=sqlite3.Connection("../DB/ESM_pruebas.db")
     app=QtWidgets.QApplication(sys.argv)

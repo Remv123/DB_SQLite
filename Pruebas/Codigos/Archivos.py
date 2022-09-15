@@ -19,6 +19,15 @@ def openFileNameDialog(obj):
     fileName, _ = QFileDialog.getOpenFileName(obj,"Cargar Base de datos", "","All Files (*);;Database file (*.db)", options=options)
     if fileName:
         return fileName
+
+
+def SaveFileNameDialog(obj):
+    opcion=""
+    options = QFileDialog.Options()
+    options |= QFileDialog.DontUseNativeDialog
+    fileName, _ = QFileDialog.getSaveFileName(obj,"Respaldar Base de datos", "","All Files (*);;Database file (*.db);;Excel files(.xlsx)", options=options)
+    if fileName:
+        return fileName
     
    
     

@@ -3,26 +3,36 @@
 
 
 from PyQt5 import QtWidgets, uic
+from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton,QComboBox
+from PyQt5.Qt import pyqtSignal
+
 import sys,sqlite3
 from CustomTableView import TableViewer
+from ValidacionesMaterias import ValidarMaterias
 import Mensajes
 
-class Materia(QtWidgets.QDialog):
+class Materia(QDialog):
+    close_signal=pyqtSignal()
     def __init__(self,DBconnection):
         super(Materia,self).__init__()
         uic.loadUi("../UI/Materias.ui",self)
         self.con=DBconnection
-        self.input1=self.findChild(QtWidgets.QLineEdit,"Clave")
-        self.input2=self.findChild(QtWidgets.QLineEdit,"Nombre")
-        self.input3=self.findChild(QtWidgets.QLineEdit,"Semestre")
-        self.input4=self.findChild(QtWidgets.QComboBox,"Departamento")
-        self.button1=self.findChild(QtWidgets.QPushButton, "Insertar")
+        self.cursor=DBconnection.cursor()
+        self.input1=self.findChild(QLineEdit,"Clave")
+        self.input2=self.findChild(QLineEdit,"Nombre")
+        self.input3=self.findChild(QLineEdit,"Semestre")
+        self.input4=self.findChild(QComboBox,"Departamento")
+        self.button1=self.findChild(QPushButton, "Insertar")
         self.button1.clicked.connect(self.InsertarValoresMaterias)
-        self.button2=self.findChild(QtWidgets.QPushButton,"Imprimir")
+        self.button2=self.findChild(QPushButton,"Imprimir")
         self.button2.clicked.connect(self.VerTabla)
+        self.TV=None #TableViewer
+
+        
+  
+  
     
     def InsertarValoresMaterias(self):
-        cursor=self.con.cursor()
         clave=self.input1.text()
         Nombre=self.input2.text()
         Semestre=self.input3.text()
@@ -30,9 +40,15 @@ class Materia(QtWidgets.QDialog):
         oracion="""insert or ignore into Materias(CveMateria,
         NombreMateria,SemestreMateria,DepartamentoMateria) values(?,?,?,?)"""
         if self.ValidarDatos(clave,Nombre,Semestre):
-            cursor.execute(oracion,(clave,Nombre,Semestre,Departamento))
-            Mensajes.MostrarExito()
+            self.cursor.execute(oracion,(clave,Nombre,Semestre,Departamento))
             self.con.commit()
+            self.ClearLineEdits()
+            Mensajes.MostrarExito()
+            
+            
+    def ClearLineEdits(self):
+         for child in self.findChildren(QLineEdit):
+             child.clear()
     
     def ValidarDatos(self,clave,nombre,semestre):
         mensaje=""
@@ -40,15 +56,7 @@ class Materia(QtWidgets.QDialog):
         if len(clave)==0  or len(nombre)==0 or len(semestre)==0:
             errores+=1
             mensaje="Existe algun campo vacio\n"
-        if len(clave)>15:
-            errores+=1
-            mensaje="La abreviatura es demasiado grande\n"
-        if any(c.isdigit() for c in nombre):
-            errores+=1
-            mensaje+="El nombre de la materia no puede contener numeros\n"
-        if any(c.isalpha() for c in semestre):
-            errores+=1
-            mensaje+="El semestre no debe contener letras"
+        mensaje,errores=ValidarMaterias(clave, nombre, semestre, errores, mensaje)
         if errores>0:
             Mensajes.MostrarErroresInsercion(mensaje)
             return False
@@ -58,9 +66,15 @@ class Materia(QtWidgets.QDialog):
     def __exit__(self):
         self.con.close()
     def VerTabla(self):
-        self.TV=TableViewer("Materias",self.con)
+        self.TV=TableViewer("Materias",self.cursor)
         self.TV.setWindowTitle("Materias")
         self.TV.show()
+    def closeEvent(self,event):
+        self.on_close()
+    def on_close(self):
+        if self.TV is not None:
+            self.TV.close()
+        self.close_signal.emit()
     
 if __name__=="__main__":
     con=sqlite3.Connection("../DB/ESM_pruebas.db")
