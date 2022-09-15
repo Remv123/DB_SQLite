@@ -6,145 +6,106 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>286</width>
-    <height>428</height>
+    <width>360</width>
+    <height>373</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Registrar Materias</string>
   </property>
-  <widget class="QLineEdit" name="Clave">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>51</x>
-     <y>112</y>
-     <width>125</width>
-     <height>23</height>
+     <x>50</x>
+     <y>30</y>
+     <width>140</width>
+     <height>196</height>
     </rect>
    </property>
+   <layout class="QFormLayout" name="formLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Clave de la materia</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLineEdit" name="Clave"/>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Nombre de la materia</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLineEdit" name="Nombre"/>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Semestre</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLineEdit" name="Semestre"/>
+    </item>
+    <item row="6" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Departamento</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0">
+     <widget class="QComboBox" name="Departamento">
+      <item>
+       <property name="text">
+        <string>Básicas</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Humanista</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Clínica</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
   </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>51</x>
-     <y>91</y>
-     <width>118</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Clave de la materia</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="Nombre">
-   <property name="geometry">
-    <rect>
-     <x>51</x>
-     <y>162</y>
-     <width>125</width>
-     <height>23</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>51</x>
-     <y>141</y>
-     <width>132</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Nombre de la materia</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="Semestre">
-   <property name="geometry">
-    <rect>
-     <x>51</x>
-     <y>212</y>
-     <width>125</width>
-     <height>23</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>51</x>
-     <y>191</y>
-     <width>58</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Semestre</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_4">
-   <property name="geometry">
-    <rect>
-     <x>51</x>
-     <y>241</y>
-     <width>88</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Departamento</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="Insertar">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>350</y>
-     <width>80</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Insertar</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="Imprimir">
-   <property name="geometry">
-    <rect>
-     <x>170</x>
-     <y>350</y>
-     <width>80</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Ver Tabla</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="Departamento">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
      <x>50</x>
      <y>260</y>
-     <width>131</width>
-     <height>23</height>
+     <width>182</width>
+     <height>25</height>
     </rect>
    </property>
-   <item>
-    <property name="text">
-     <string>Básicas</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Humanista</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Clínica</string>
-    </property>
-   </item>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QPushButton" name="Insertar">
+      <property name="text">
+       <string>Insertar Datos</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="Imprimir">
+      <property name="text">
+       <string>Ver Tabla</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

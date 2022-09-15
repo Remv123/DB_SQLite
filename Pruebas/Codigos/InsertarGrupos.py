@@ -2,24 +2,31 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import uic,QtWidgets
+from PyQt5.Qt import pyqtSignal
+from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton
 from CustomTableView import TableViewer
 from ValidacionesGrupo import ValidarClaveGrupo
-
 import sqlite3,Mensajes,sys
 
-class Grupo(QtWidgets.QDialog):
+class Grupo(QDialog):
+    close_signal=pyqtSignal()
     def __init__(self,DBconnection):
         super(Grupo, self).__init__()
         uic.loadUi("../UI/Grupos.ui",self)
         self.con=DBconnection
-        self.input1=self.findChild(QtWidgets.QLineEdit,"Grupo")
-        self.button1=self.findChild(QtWidgets.QPushButton,"Insertar")
+        self.cursor=DBconnection.cursor()
+
+
+        self.input1=self.findChild(QLineEdit,"Grupo")
+        self.button1=self.findChild(QPushButton,"Insertar")
         self.button1.clicked.connect(self.InsertarGrupo)
-        self.button2=self.findChild(QtWidgets.QPushButton,"Ver")
+        self.button2=self.findChild(QPushButton,"Ver")
         self.button2.clicked.connect(self.VerGrupos)
-     
+        self.TV=None #TableViewer
+
+        
+    
     def InsertarGrupo(self):
-        cursor=self.con.cursor()
         NombreGrupo=self.input1.text()
         oracion="insert or ignore into Grupo(CveGrupo,GrupoSemestre) values (?,?)"
         if self.ValidarGrupo(NombreGrupo):
@@ -30,10 +37,14 @@ class Grupo(QtWidgets.QDialog):
                 Semestre="11°"
             if NombreGrupo[0]=="C":
                 Semestre="12°"
-            cursor.execute(oracion,(NombreGrupo,Semestre))
+
+            self.cursor.execute(oracion,(NombreGrupo,Semestre))
             self.con.commit()
+            self.ClearLineEdits()
             Mensajes.MostrarExito()
-    
+    def ClearLineEdits(self):
+        for child in self.findChildren(QLineEdit):
+            child.clear()
     def ValidarGrupo(self,Grupo):
         Mensaje=""
         Errores=0
@@ -44,19 +55,24 @@ class Grupo(QtWidgets.QDialog):
         else:
             return True
 
-       
-    def __exit__(self):
-        self.con.close()
+      
+    def closeEvent(self,event):
+        self.on_close()
+    def on_close(self):
+        if self.TV is not None:
+            self.TV.close()
+        self.close_signal.emit()
+    
             
     
     
     def VerGrupos(self):
-        self.TV=TableViewer("Grupo", self.con)
+        self.TV=TableViewer("Grupo", self.cursor)
         self.TV.show()
         
     
 if __name__=="__main__":
-    con=sqlite3.Connection("../DB/ESM_pruebas.db")
+    con=sqlite3.Connection("../DB/ESM.db")
     app=QtWidgets.QApplication(sys.argv)
     window=Grupo(con)
     window.show()

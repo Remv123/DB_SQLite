@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import sys,sqlite3
+
 from PyQt5 import QtWidgets,QtCore
 
-
 class TableViewer(QtWidgets.QWidget):
-    def __init__(self,TableName,con):
+    def __init__(self,TableName,cursor):
         super().__init__()
-        self.con=con
+        self.cursor=cursor
         self.edit=QtWidgets.QLineEdit()
         self.combo=QtWidgets.QComboBox()
         self.table=QtWidgets.QTableWidget()
@@ -24,15 +26,15 @@ class TableViewer(QtWidgets.QWidget):
         
         
     def populate_table(self,query):
-        cursor=self.con.cursor()
-        cursor.execute(query)            
-        name_of_columns=[e[0] for e in cursor.description]
+       
+        self.cursor.execute(query)            
+        name_of_columns=[e[0] for e in self.cursor.description]
         self.table.setColumnCount(len(name_of_columns))
         self.table.setRowCount(0)
         self.table.setHorizontalHeaderLabels(name_of_columns)
         self.combo.clear()
         self.combo.addItems(name_of_columns)
-        rows=cursor.fetchall()
+        rows=self.cursor.fetchall()
         for i ,row_data in enumerate(rows):
             self.table.insertRow(self.table.rowCount())
             for j,value in enumerate(row_data):
@@ -53,14 +55,18 @@ class TableViewer(QtWidgets.QWidget):
         from Grupo order by substr(CveGrupo,1,3),
         substr(CveGrupo,4,9)*1"""
         if TableName=="Alumno":
-            return """Select CveAlumno as Boleta,NombreAlumno as Nombre,
+            return """Select CveAlumno as NoBoleta,NombreAlumno as Nombre,
         ApellidosAlumno as Apellidos,EmailAlumno as Email from Alumno"""
         if TableName=="Cuenta":
             return "select CveAlumno as Boleta,NombreCuenta,Contrasena,Semestre from Cuenta"
         if TableName=="CuentasMaterias":
             return """select NombreCuenta as Usuario,NomMateria as AbreviaturaMateria,
-        Cvegrupo as grupo,SemestreCuentaMaterias as Semestre from CuentaMaterias
+        Cvegrupo as Grupo,SemestreCuentaMaterias as Semestre from CuentaMaterias
     """
+        if TableName=="Usuarios":
+            return """Select NombreUsuario as Usuario,Contrasena  from Usuarios
+        """
+       
    
     def filter_table(self,text):
         if text:
@@ -83,7 +89,8 @@ class TableViewer(QtWidgets.QWidget):
         
 if __name__=="__main__":
     app=QtWidgets.QApplication(sys.argv)
-    con=sqlite3.Connection("../DB/ESM_pruebas.db") #conexión a la base de datos
-    window=TableViewer("Materias",con)
+    #con=sqlite3.Connection("../DB/ESM_pruebas.db") #conexión a la base de datos
+    con=sqlite3.Connection("../DB/ESM_pruebas.db")
+    cursor=con.cursor() 
+    window=TableViewer("Prueba",cursor)
     app.exec()
-

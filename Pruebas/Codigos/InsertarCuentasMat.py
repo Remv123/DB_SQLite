@@ -4,47 +4,56 @@
 
 import sys,Mensajes,sqlite3
 from PyQt5 import QtWidgets,uic
-from CustomTableView import TableViewer
-from ValidacionesCuentas import ValidarUsuario,ValidarFecha
+from PyQt5.QtWidgets import QDialog,QComboBox,QLineEdit,QPushButton
+from PyQt5.Qt import pyqtSignal
 
-class CuentasMaterias(QtWidgets.QDialog):
+from CustomTableView import TableViewer
+from ValidacionesCuentas import ValidarUsuario,ValidarFecha,VerificarCuentaExista
+
+
+class CuentasMaterias(QDialog):
+    close_signal=pyqtSignal()
     def __init__(self,DBconnection):
         super(CuentasMaterias,self).__init__()
         uic.loadUi("../UI/CuentasMaterias.ui",self)
         self.con=DBconnection
-        self.input1=self.findChild(QtWidgets.QLineEdit,"NombreCuenta")
-        self.input2=self.findChild(QtWidgets.QLineEdit,"Periodo")
-        self.cb1=self.findChild(QtWidgets.QComboBox,"AbrMat")
-        self.cb1.addItems(self.LlenarComboMat())
-        self.cb1.currentTextChanged.connect(self.UpdateCbGrupo)
-        self.cb2=self.findChild(QtWidgets.QComboBox,"Grupo")
-        self.cb2.addItems(self.LLenarComboGrupo())
-        self.button1=self.findChild(QtWidgets.QPushButton,"Insertar")
-        self.button1.clicked.connect(self.InsertarValores)
-        self.button2=self.findChild(QtWidgets.QPushButton,"Ver")
-        self.button2.clicked.connect(self.VerTabla)
-        self.button3=self.findChild(QtWidgets.QPushButton,"VerCuentas")
-        self.button3.clicked.connect(self.VerTablaCuentas)
+        self.cursor=DBconnection.cursor()
+
+        self.input1=self.findChild(QLineEdit,"NombreCuenta")
         
-          
+        self.cb1=self.findChild(QComboBox,"AbrMat")
+        self.cb1.addItems(self.LlenarComboMat())
+        self.cb1.currentTextChanged.connect(lambda: self.UpdateCbGrupo())
+        self.cb2=self.findChild(QComboBox,"Grupo")
+        self.cb2.addItems(self.LLenarComboGrupo())
+        self.button1=self.findChild(QPushButton,"Insertar")
+        self.button1.clicked.connect(self.InsertarValores)
+        self.button2=self.findChild(QPushButton,"Ver")
+        self.button2.clicked.connect(self.VerTabla)
+        self.button3=self.findChild(QPushButton,"VerCuentas")
+        self.button3.clicked.connect(self.VerTablaCuentas)
+        self.TV=None #TableViewer
+
+   
+ 
     def LlenarComboMat(self): #obtiene la lista de resultados de la Base para meterlos a la combobox
-        cursor=self.con.cursor()
         oracion="select distinct NombreMateria from Materias order by NombreMateria"
-        cursor.execute(oracion,())
+        self.cursor.execute(oracion,())
         resultados=[]
-        for row in cursor.fetchall():
+        for row in self.cursor.fetchall():
             resultados.append(row[0])
         return resultados
+    
     def LLenarComboGrupo(self):
         self.cb2.clear()
-        cursor=self.con.cursor()
         Semestre=self.cb1.currentText()
         resultados=[]
         oracion="""select CveGrupo from Grupo inner join Materias 
         on Grupo.GrupoSemestre=Materias.SemestreMateria where NombreMateria=? order by substr(CveGrupo,1,3),
         substr(CveGrupo,4,9)*1"""
-        cursor.execute(oracion,(Semestre,))
-        for row in cursor.fetchall():
+      
+        self.cursor.execute(oracion,(Semestre,))
+        for row in self.cursor.fetchall():
             resultados.append(row[0])
         return resultados
     
@@ -52,11 +61,11 @@ class CuentasMaterias(QtWidgets.QDialog):
        self.cb2.addItems(self.LLenarComboGrupo())
     
     def InsertarValores(self):
-        cursor=self.con.cursor()
         Cuenta=self.input1.text()
         Materia=self.cb1.currentText()
         Grupo=self.cb2.currentText()
-        Semestre=self.input2.text()
+        obtenerSemestre="""select Semestre from Cuenta Where NombreCuenta=?"""
+       
         ClaveMat=""
         obtenerClaveMat="""select CveMateria from Materias inner join Grupo
         on Grupo.GrupoSemestre=Materias.SemestreMateria where NombreMateria=? and CveGrupo=?
@@ -64,22 +73,29 @@ class CuentasMaterias(QtWidgets.QDialog):
         oracion="""insert or ignore into CuentaMaterias(NombreCuenta,NomMateria,
         CveGrupo,SemestreCuentaMaterias) values(?,?,?,?)"""
         #agregar Validaciones
-        cursor.execute(obtenerClaveMat,(Materia,Grupo))
-        ClaveMat=cursor.fetchone()[0]
-        if self.ValidacionesDatos(Cuenta,Semestre):
-            cursor.execute(oracion,(Cuenta,ClaveMat,Grupo,Semestre))
+        self.cursor.execute(obtenerClaveMat,(Materia,Grupo))
+        ClaveMat=self.cursor.fetchone()[0]
+        if self.ValidacionesDatos(Cuenta):
+            
+            self.cursor.execute(obtenerSemestre,(Cuenta,))
+            Semestre=self.cursor.fetchone()[0]
+            self.cursor.execute(oracion,(Cuenta,ClaveMat,Grupo,Semestre))
             self.con.commit()
+            self.ClearLineEdits()
             Mensajes.MostrarExito()
-        
-    def ValidacionesDatos(self,Cuenta,Semestre):
+            
+    def ClearLineEdits(self):
+        for child in self.findChildren(QLineEdit):
+            child.clear()
+            
+    def ValidacionesDatos(self,Cuenta):
         Mensaje=""
         Errores=0
-        if len(Cuenta)==0 or len(Semestre)==0:
+        if len(Cuenta)==0: 
             Mensaje+="Existen campos vacios\n"
             Errores+=1
         Mensaje,Errores=ValidarUsuario(Cuenta, Mensaje, Errores)
-        Mensaje,Errores=ValidarFecha(Semestre, Mensaje, Errores)
-       
+        Mensaje,Errores=VerificarCuentaExista(Cuenta, Mensaje, Errores, self.con)
         if Errores>0:
             Mensajes.MostrarErroresInsercion(Mensaje)
             return False
@@ -87,18 +103,25 @@ class CuentasMaterias(QtWidgets.QDialog):
             return True
     
     def VerTabla(self):
-        self.TV=TableViewer("CuentasMaterias",self.con)
+        self.TV=TableViewer("CuentasMaterias",self.cursor)
         self.TV.show()
     def VerTablaCuentas(self):
-         self.TV=TableViewer("Cuenta",self.con)
+         self.TV=TableViewer("Cuenta",self.cursor)
          self.TV.show()
-    def __exit__(self):
-          self.con.close()
+   
+    def closeEvent(self,event):
+        self.on_close()
+    def on_close(self):
+        if self.TV is not None:
+            self.TV.close()
+        self.close_signal.emit()
+
 
 
 
 if __name__=="__main__":
     con=sqlite3.Connection("../DB/ESM_pruebas.db")
+    #con=sqlite.Connection("../DB/ESM.db")
     app=QtWidgets.QApplication(sys.argv)
     window=CuentasMaterias(con)
     window.show()

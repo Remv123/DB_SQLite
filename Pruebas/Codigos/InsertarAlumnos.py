@@ -2,38 +2,49 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets, uic
+from PyQt5.QtWidgets import QLineEdit,QPushButton,QDialog
+from PyQt5.Qt import pyqtSignal
 import sys,sqlite3,Mensajes
 from CustomTableView import TableViewer
 from ValidacionesAlumnos import ValidarApellidos,ValidarBoleta,ValidarCorreo,ValidarNombre
 
-class Alumnos(QtWidgets.QDialog):
+class Alumnos(QDialog):
+    close_signal=pyqtSignal()
     def __init__(self,DBconnection):
         super(Alumnos,self).__init__()
         uic.loadUi("../UI/Alumnos.ui",self)
         self.con=DBconnection
-        self.input1=self.findChild(QtWidgets.QLineEdit,"Boleta")
-        self.input2=self.findChild(QtWidgets.QLineEdit,"Nombre")
-        self.input3=self.findChild(QtWidgets.QLineEdit,"ApPat")
-        self.input4=self.findChild(QtWidgets.QLineEdit,"Correo")
+        self.cursor=DBconnection.cursor()
+        self.Boleta=self.findChild(QLineEdit,"Boleta")
+        self.Nombre=self.findChild(QLineEdit,"Nombre")
+        self.Apellidos=self.findChild(QLineEdit,"ApPat")
+        self.Correo=self.findChild(QLineEdit,"Correo")
+        self.buttonInsertar=self.findChild(QPushButton,"Insertar")
+        self.buttonInsertar.clicked.connect(self.InsertarValoresAlumnos)
+        self.buttonVer=self.findChild(QPushButton,"Ver")
+        self.buttonVer.clicked.connect(self.verTabla)
+        self.TV=None #TableViewer
        
-        self.button1=self.findChild(QtWidgets.QPushButton,"Insertar")
-        self.button1.clicked.connect(self.InsertarValoresAlumnos)
-        self.button2=self.findChild(QtWidgets.QPushButton,"Ver")
-        self.button2.clicked.connect(self.verTabla)
+    
+   
     
     def InsertarValoresAlumnos(self):
-        cursor=self.con.cursor()
-        Boleta=self.input1.text()
-        Nombre=self.input2.text()
-        Apellidos=self.input3.text()
-        Correo=self.input4.text()
+        Boleta=self.Boleta.text()
+        Nombre=self.Nombre.text()
+        Apellidos=self.Apellidos.text()
+        Correo=self.Correo.text()
         if self.ValidacionesDatos(Boleta,Nombre,Apellidos,Correo):
             oracion="insert or ignore into Alumno values(?,?,?,?)"
-            cursor.execute(oracion,(Boleta,Nombre,Apellidos,Correo))
+            
+            self.cursor.execute(oracion,(Boleta,Nombre,Apellidos,Correo))
             self.con.commit()
+            self.ClearLineEdits()
             Mensajes.MostrarExito()
     
    
+    def ClearLineEdits(self):
+        for child in self.findChildren(QLineEdit):
+            child.clear()
     def ValidacionesDatos(self,Boleta,Nombre,Apellidos,Correo):        
         Errores=0
         Error=""
@@ -51,14 +62,18 @@ class Alumnos(QtWidgets.QDialog):
            return True
        
     def verTabla(self):
-       self.TV=TableViewer("Alumno",self.con)
+       self.TV=TableViewer("Alumno",self.cursor)
        self.TV.setWindowTitle("Alumnos")
        self.TV.show()
- 
+    def closeEvent(self,event):
+        self.on_close()
+    def on_close(self):
+        if self.TV is not None:
+            self.TV.close()
+        self.close_signal.emit()
 
      
-    def __exit__(self):
-        self.con.close()
+   
 
 
      
