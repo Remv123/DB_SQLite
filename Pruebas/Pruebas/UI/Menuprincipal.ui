@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Menu</class>
+ <widget class="QMainWindow" name="Menu">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>520</width>
+    <height>460</height>
+   </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>520</width>
+    <height>460</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Menu principal</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>20</y>
+      <width>451</width>
+      <height>361</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QPushButton" name="Alumnos">
+       <property name="text">
+        <string>Alumnos</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="3" column="1">
+          <widget class="QPushButton" name="EliminarMateriasAl">
+           <property name="text">
+            <string>Eliminar Materias a un alumno</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="RegistrarAl">
+           <property name="text">
+            <string>Registrar Alumno</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QPushButton" name="AsignarMateriasAl">
+           <property name="text">
+            <string>Inscribir Materias a un alumno</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="RegistrarCuentas">
+           <property name="text">
+            <string>Registrar cuentas de Usuario</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="EliminarAl">
+           <property name="text">
+            <string>Eliminar Alumno</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="EliminarCuentas">
+           <property name="text">
+            <string>Eliminar cuenta</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QPushButton" name="Materias">
+       <property name="text">
+        <string>Materias</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QPushButton" name="RegistrarMat">
+         <property name="text">
+          <string>Registrar Materias</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="EliminarMat">
+         <property name="text">
+          <string>Eliminar Materias</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QPushButton" name="Grupos">
+       <property name="text">
+        <string>Grupos</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QPushButton" name="RegistrarGpo">
+         <property name="text">
+          <string>Registrar Grupo</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="EliminarGpo">
+         <property name="text">
+          <string>Eliminar Grupo</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>520</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuExportar">
+    <property name="title">
+     <string>Exportar</string>
+    </property>
+    <widget class="QMenu" name="menuA_excel">
+     <property name="title">
+      <string>A excel</string>
+     </property>
+     <addaction name="actionResult"/>
+    </widget>
+    <addaction name="menuA_excel"/>
+   </widget>
+   <widget class="QMenu" name="menuAdmin">
+    <property name="title">
+     <string>Admin</string>
+    </property>
+    <widget class="QMenu" name="menuUsuario">
+     <property name="title">
+      <string>Usuarios aplicacion</string>
+     </property>
+     <addaction name="actionCrearUsuario_2"/>
+     <addaction name="actionEliminar_Usuario"/>
+    </widget>
+    <addaction name="menuUsuario"/>
+    <addaction name="actionRespaldarBD"/>
+   </widget>
+   <addaction name="menuExportar"/>
+   <addaction name="menuAdmin"/>
+  </widget>
+  <action name="actionCargar">
+   <property name="text">
+    <string>Cargar</string>
+   </property>
+  </action>
+  <action name="actionRespaldar">
+   <property name="text">
+    <string>Respaldar</string>
+   </property>
+  </action>
+  <action name="actionALL">
+   <property name="text">
+    <string>Exportar toda la base de datos</string>
+   </property>
+  </action>
+  <action name="actionObtener_la_tabla_resultado">
+   <property name="text">
+    <string>Obtener la tabla resultado</string>
+   </property>
+  </action>
+  <action name="actionToda_la_base">
+   <property name="text">
+    <string>Toda la base </string>
+   </property>
+  </action>
+  <action name="actionResult">
+   <property name="text">
+    <string>Tabla Usuarios Moodle</string>
+   </property>
+  </action>
+  <action name="actionALL_2">
+   <property name="text">
+    <string>Toda la base de datos</string>
+   </property>
+  </action>
+  <action name="actionRespaldarBD">
+   <property name="text">
+    <string>Respaldar Base de datos</string>
+   </property>
+  </action>
+  <action name="actionCrearUsuario_2">
+   <property name="text">
+    <string>Crear Nuevo Usuario</string>
+   </property>
+  </action>
+  <action name="actionEliminar_Usuario">
+   <property name="text">
+    <string>Eliminar Usuario</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
