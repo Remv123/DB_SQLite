@@ -6,26 +6,27 @@ import sys,Mensajes,sqlite3
 from PyQt5 import QtWidgets,uic
 from PyQt5.QtWidgets import QDialog,QComboBox,QLineEdit,QPushButton
 from PyQt5.Qt import pyqtSignal
-
 from CustomTableView import TableViewer
-from ValidacionesCuentas import ValidarUsuario,ValidarFecha,VerificarCuentaExista
-
+from ValidacionesCuentas import ValidarUsuario,VerificarCuentaExista, ValidarFecha
+from ResourcePath import resource_path
 
 class CuentasMaterias(QDialog):
     close_signal=pyqtSignal()
     def __init__(self,DBconnection):
         super(CuentasMaterias,self).__init__()
-        uic.loadUi("../UI/CuentasMaterias.ui",self)
+        uic.loadUi(resource_path("UI/CuentasMaterias.ui"),self)
         self.con=DBconnection
         self.cursor=DBconnection.cursor()
 
         self.input1=self.findChild(QLineEdit,"NombreCuenta")
-        
+        self.cb3=self.findChild(QComboBox,"Semestre")
+        self.cb3.addItems(self.LlenarComboSemestre())
+        self.cb3.currentTextChanged.connect(lambda: self.UpdateCb())
         self.cb1=self.findChild(QComboBox,"AbrMat")
         self.cb1.addItems(self.LlenarComboMat())
-        self.cb1.currentTextChanged.connect(lambda: self.UpdateCbGrupo())
         self.cb2=self.findChild(QComboBox,"Grupo")
         self.cb2.addItems(self.LLenarComboGrupo())
+        self.input2=self.findChild(QLineEdit,"Fecha")
         self.button1=self.findChild(QPushButton,"Insertar")
         self.button1.clicked.connect(self.InsertarValores)
         self.button2=self.findChild(QPushButton,"Ver")
@@ -37,8 +38,10 @@ class CuentasMaterias(QDialog):
    
  
     def LlenarComboMat(self): #obtiene la lista de resultados de la Base para meterlos a la combobox
-        oracion="select distinct NombreMateria from Materias order by NombreMateria"
-        self.cursor.execute(oracion,())
+        self.cb1.clear()
+        Semestre=self.cb3.currentText()
+        oracion="select distinct NombreMateria from Materias where SemestreMateria=? order by NombreMateria"
+        self.cursor.execute(oracion,(Semestre,))
         resultados=[]
         for row in self.cursor.fetchall():
             resultados.append(row[0])
@@ -46,10 +49,9 @@ class CuentasMaterias(QDialog):
     
     def LLenarComboGrupo(self):
         self.cb2.clear()
-        Semestre=self.cb1.currentText()
+        Semestre=self.cb3.currentText()
         resultados=[]
-        oracion="""select CveGrupo from Grupo inner join Materias 
-        on Grupo.GrupoSemestre=Materias.SemestreMateria where NombreMateria=? order by substr(CveGrupo,1,3),
+        oracion="""select CveGrupo from Grupo where GrupoSemestre=? order by substr(CveGrupo,1,3),
         substr(CveGrupo,4,9)*1"""
       
         self.cursor.execute(oracion,(Semestre,))
@@ -57,14 +59,25 @@ class CuentasMaterias(QDialog):
             resultados.append(row[0])
         return resultados
     
-    def UpdateCbGrupo(self):#cuando se actualice el nombre de la materia solamente mostrara los grupos validos
-       self.cb2.addItems(self.LLenarComboGrupo())
+    def LlenarComboSemestre(self):
+        oracion="Select distinct SemestreMateria from Materias order by substr(SemestreMateria,1,2)*1"
+        self.cursor.execute(oracion)
+        resultados=[]
+        for row in self.cursor.fetchall():
+            resultados.append(row[0])
+        return resultados
+        
     
+    def UpdateCb(self):#cuando se actualice el nombre de la materia solamente mostrara los grupos validos
+       self.cb2.addItems(self.LLenarComboGrupo())
+       self.cb1.addItems(self.LlenarComboMat())
+   
+        
     def InsertarValores(self):
         Cuenta=self.input1.text()
         Materia=self.cb1.currentText()
         Grupo=self.cb2.currentText()
-        obtenerSemestre="""select Semestre from Cuenta Where NombreCuenta=?"""
+        Semestre=self.input2.text()
        
         ClaveMat=""
         obtenerClaveMat="""select CveMateria from Materias inner join Grupo
@@ -75,10 +88,7 @@ class CuentasMaterias(QDialog):
         #agregar Validaciones
         self.cursor.execute(obtenerClaveMat,(Materia,Grupo))
         ClaveMat=self.cursor.fetchone()[0]
-        if self.ValidacionesDatos(Cuenta):
-            
-            self.cursor.execute(obtenerSemestre,(Cuenta,))
-            Semestre=self.cursor.fetchone()[0]
+        if self.ValidacionesDatos(Cuenta,Semestre):
             self.cursor.execute(oracion,(Cuenta,ClaveMat,Grupo,Semestre))
             self.con.commit()
             self.ClearLineEdits()
@@ -88,15 +98,16 @@ class CuentasMaterias(QDialog):
         for child in self.findChildren(QLineEdit):
             child.clear()
             
-    def ValidacionesDatos(self,Cuenta):
+    def ValidacionesDatos(self,Cuenta,Fecha):
         Mensaje=""
-        Errores=0
         if len(Cuenta)==0: 
             Mensaje+="Existen campos vacios\n"
-            Errores+=1
-        Mensaje,Errores=ValidarUsuario(Cuenta, Mensaje, Errores)
-        Mensaje,Errores=VerificarCuentaExista(Cuenta, Mensaje, Errores, self.con)
-        if Errores>0:
+        else:
+            Mensaje=ValidarUsuario(Cuenta, Mensaje)
+            Mensaje=VerificarCuentaExista(Cuenta, Mensaje,  self.con)
+            Mensaje=ValidarFecha(Fecha, Mensaje)
+        print(Mensaje)
+        if Mensaje!="":
             Mensajes.MostrarErroresInsercion(Mensaje)
             return False
         else:

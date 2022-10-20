@@ -5,23 +5,22 @@
 import sys,Mensajes,sqlite3
 from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton
 from PyQt5.Qt import pyqtSignal
-
+from ResourcePath import resource_path
 from PyQt5 import QtWidgets,uic
 from CustomTableView import TableViewer
 from ValidacionesAlumnos import ValidarBoleta
 from ValidacionesCuentas import ValidarFecha
-from pysqlcipher3 import dbapi2 as sqlite
+
 
 class CuentasBorrar(QDialog):
     close_signal=pyqtSignal()
 
     def __init__(self,DBconnection):
         super(CuentasBorrar,self).__init__()
-        uic.loadUi("../UI/EliminarCuentas.ui",self)
+        uic.loadUi(resource_path("UI/EliminarCuentas.ui"),self)
         self.con=DBconnection
         self.cursor=DBconnection.cursor()
         self.input1=self.findChild(QLineEdit,"Boleta")
-        self.input2=self.findChild(QLineEdit,"Semestre")
         self.button1=self.findChild(QPushButton,"Borrar")
         self.button1.clicked.connect(self.BorrarCuenta)
         self.button2=self.findChild(QPushButton,"Ver")
@@ -32,10 +31,10 @@ class CuentasBorrar(QDialog):
         
     def BorrarCuenta(self):
         Boleta=self.input1.text()
-        Semestre=self.input2.text()
-        oracion="""delete from Cuenta where CveAlumno=? and Semestre=?"""
-        if self.ValidacionesBorrar(Boleta,Semestre):
-            self.cursor.execute(oracion,(Boleta,Semestre))
+       
+        oracion="""delete from Cuenta where CveAlumno=?"""
+        if self.ValidacionesBorrar(Boleta):
+            self.cursor.execute(oracion,(Boleta,))
             self.con.commit()
             self.ClearLineEdits()
             Mensajes.MostrarExitoBorrar()
@@ -45,15 +44,13 @@ class CuentasBorrar(QDialog):
         for child in self.findChildren(QLineEdit):
             child.clear()
     
-    def ValidacionesBorrar(self,Boleta,Semestre):
-        Errores=0
+    def ValidacionesBorrar(self,Boleta):
         Mensaje=""
-        if len(Boleta)==0 or len(Semestre)==0:
+        if len(Boleta)==0 :
             Mensaje+="Existe algún campo vacio\n"
-            Errores+=1
-        Mensaje,Errores=ValidarBoleta(Boleta, Mensaje, Errores)
-        Mensaje,Errores=ValidarFecha(Semestre, Mensaje, Errores)
-        if Errores>0:
+        else:
+            Mensaje=ValidarBoleta(Boleta, Mensaje)
+        if Mensaje!="":
             Mensajes.MostrarErroresBorrar(Mensaje)
             return False
         else:

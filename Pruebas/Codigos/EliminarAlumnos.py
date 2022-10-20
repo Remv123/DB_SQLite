@@ -5,17 +5,16 @@
 import sqlite3,Mensajes,sys
 from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton
 from PyQt5.Qt import pyqtSignal
-
 from PyQt5 import QtWidgets, uic
 from CustomTableView import TableViewer
 from ValidacionesAlumnos import ValidarBoleta,VerificarBoletaBaseDatos
-
+from ResourcePath import resource_path
 class AlumnoBorrar(QDialog):
     close_signal=pyqtSignal()
 
     def __init__(self,DBconnection):
         super(AlumnoBorrar,self).__init__()
-        uic.loadUi("../UI/ElimnarAlumno.ui",self)
+        uic.loadUi(resource_path("UI/ElimnarAlumno.ui"),self)
         self.con=DBconnection
         self.cursor=DBconnection.cursor()
         self.input1=self.findChild(QLineEdit,"Boleta")
@@ -40,11 +39,11 @@ class AlumnoBorrar(QDialog):
              child.clear()
     
     def ValidacionesDatos(self,Boleta):        
-        Errores=0
+        
         Mensaje=""
-        Mensaje,Errores=ValidarBoleta(Boleta, Mensaje, Errores)
-        Mensaje,Errores=VerificarBoletaBaseDatos(Boleta, Mensaje, Errores, self.con)
-        if Errores>0:
+        Mensaje=ValidarBoleta(Boleta, Mensaje)
+        Mensaje=VerificarBoletaBaseDatos(Boleta, Mensaje, self.con)
+        if Mensaje!="":
              Mensajes.MostrarErroresBorrar(Mensaje)
              return False
         else:

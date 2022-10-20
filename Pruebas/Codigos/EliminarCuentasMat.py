@@ -8,14 +8,14 @@ from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton,QComboBox
 from PyQt5.Qt import pyqtSignal
 from CustomTableView import TableViewer
 from ValidacionesCuentas import ValidarFecha,ValidarUsuario
-
+from ResourcePath import resource_path
 
 class CuentaMateriaBorrar(QDialog):
     close_signal=pyqtSignal()
 
     def __init__(self,DBconnection):
         super(CuentaMateriaBorrar, self).__init__()
-        uic.loadUi("../UI/EliminarCuentasMaterias.ui",self)
+        uic.loadUi(resource_path("UI/EliminarCuentasMaterias.ui"),self)
         self.con=DBconnection
         self.cursor=DBconnection.cursor()
         self.input1=self.findChild(QLineEdit,"Cuenta")
@@ -37,7 +37,7 @@ class CuentaMateriaBorrar(QDialog):
         Cuenta=self.input1.text()
         Semestre=self.input2.text()
         resultados=[]
-        oracion="select NomMateria from CuentaMaterias where NombreCuenta=? and SemestreCuentaMaterias=? order by NomMateria"
+        oracion="select NombreMateria from CuentaMaterias inner join Materias on CuentaMaterias.NomMateria=Materias.CveMateria where NombreCuenta=? and SemestreCuentaMaterias=? order by NomMateria"
         
         self.cursor.execute(oracion,(Cuenta,Semestre))
         for row in self.cursor.fetchall():
@@ -51,21 +51,25 @@ class CuentaMateriaBorrar(QDialog):
         Cuenta=self.input1.text()
         Materia=self.cb1.currentText()
         Semestre=self.input2.text()
+        
         oracion="delete from CuentaMaterias where NombreCuenta=? and NomMateria=? and SemestreCuentaMaterias=?"
         if self.ValidacionesDatos(Cuenta, Semestre,Materia):
-            self.cursor.execute(oracion,(Cuenta,Materia,Semestre))  
+            clave="select CveMateria from Materias where NombreMateria=?"
+            self.cursor.execute(clave,(Materia,))
+            Abreviatura=self.cursor.fetchone()[0]
+            self.cursor.execute(oracion,(Cuenta,Abreviatura,Semestre))  
             self.con.commit()
             Mensajes.MostrarExitoBorrar()
     
     def ValidacionesDatos(self,Cuenta,Semestre,Materia):
         Mensaje=""
-        Errores=0
+       
         if len(Cuenta)==0 or len(Semestre)==0 or len(Materia)==0:
             Mensaje+="Existen Campos Vacios\n"
-            Errores+=1
-        Mensaje,Errores=ValidarUsuario(Cuenta, Mensaje, Errores)
-        Mensaje,Errores=ValidarFecha(Semestre, Mensaje, Errores)
-        if Errores>0:
+            
+        Mensaje=ValidarUsuario(Cuenta, Mensaje)
+        Mensaje=ValidarFecha(Semestre, Mensaje)
+        if Mensaje!="":
             Mensajes.MostrarErroresBorrar(Mensaje)
             return False
         else:

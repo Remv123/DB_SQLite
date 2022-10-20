@@ -8,7 +8,7 @@ import sys,sqlite3
 from PyQt5 import QtWidgets,QtCore
 
 class TableViewer(QtWidgets.QWidget):
-    def __init__(self,TableName,cursor):
+    def __init__(self,TableName:str,cursor):
         super().__init__()
         self.cursor=cursor
         self.edit=QtWidgets.QLineEdit()
@@ -25,7 +25,7 @@ class TableViewer(QtWidgets.QWidget):
         self.show()
         
         
-    def populate_table(self,query):
+    def populate_table(self,query:str):
        
         self.cursor.execute(query)            
         name_of_columns=[e[0] for e in self.cursor.description]
@@ -48,7 +48,7 @@ class TableViewer(QtWidgets.QWidget):
     def OrdenarTabla(self,TableName):
         if TableName == "Materias":
             return """Select CveMateria as Abreviatura,NombreMateria,
-        SemestreMateria as Semestre,DepartamentoMateria as Departamento from Materias 
+        SemestreMateria as Semestre,DepartamentoMateria as Departamento,Trimestre from Materias 
         order by DepartamentoMateria,NombreMateria"""
         if TableName=="Grupo":
             return """Select CveGrupo as Grupo,GrupoSemestre as Semestre 
@@ -58,7 +58,7 @@ class TableViewer(QtWidgets.QWidget):
             return """Select CveAlumno as NoBoleta,NombreAlumno as Nombre,
         ApellidosAlumno as Apellidos,EmailAlumno as Email from Alumno"""
         if TableName=="Cuenta":
-            return "select CveAlumno as Boleta,NombreCuenta,Contrasena,Semestre from Cuenta"
+            return "select CveAlumno as Boleta,Contrasena from Cuenta"
         if TableName=="CuentasMaterias":
             return """select NombreCuenta as Usuario,NomMateria as AbreviaturaMateria,
         Cvegrupo as Grupo,SemestreCuentaMaterias as Semestre from CuentaMaterias
@@ -84,8 +84,7 @@ class TableViewer(QtWidgets.QWidget):
     def filter_row(self,item,text):
         return text in item.text()
     
-    def __exit__(self):
-        self.con.close()
+   
         
 if __name__=="__main__":
     app=QtWidgets.QApplication(sys.argv)
