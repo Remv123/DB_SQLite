@@ -7,12 +7,12 @@ from PyQt5.Qt import pyqtSignal
 import sys,sqlite3,Mensajes
 from CustomTableView import TableViewer
 from ValidacionesAlumnos import ValidarApellidos,ValidarBoleta,ValidarCorreo,ValidarNombre
-
+from ResourcePath import resource_path
 class Alumnos(QDialog):
     close_signal=pyqtSignal()
     def __init__(self,DBconnection):
         super(Alumnos,self).__init__()
-        uic.loadUi("../UI/Alumnos.ui",self)
+        uic.loadUi(resource_path("UI/Alumnos.ui"),self)
         self.con=DBconnection
         self.cursor=DBconnection.cursor()
         self.Boleta=self.findChild(QLineEdit,"Boleta")
@@ -46,16 +46,16 @@ class Alumnos(QDialog):
         for child in self.findChildren(QLineEdit):
             child.clear()
     def ValidacionesDatos(self,Boleta,Nombre,Apellidos,Correo):        
-        Errores=0
+       
         Error=""
         if len(Boleta)==0 or len(Nombre)==0 or len(Apellidos)==0 or len(Correo)==0:
             Error+="Existen campos sin llenar\n"
-            Errores+=1
-        Error,Errores=ValidarBoleta(Boleta, Error, Errores)
-        Error,Errores=ValidarNombre(Nombre, Error, Errores)
-        Error,Errores=ValidarApellidos(Apellidos, Error, Errores)
-        Error,Errores=ValidarCorreo(Correo, Error, Errores)
-        if Errores>0:
+        else:
+            Error=ValidarBoleta(Boleta, Error)
+            Error=ValidarNombre(Nombre, Error)
+            Error=ValidarApellidos(Apellidos, Error)
+            Error=ValidarCorreo(Correo, Error)
+        if Error!="":
             Mensajes.MostrarErroresInsercion(Error)
             return False
         else:

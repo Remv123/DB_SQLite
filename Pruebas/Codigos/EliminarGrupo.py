@@ -6,17 +6,17 @@ import sys,Mensajes,sqlite3
 from PyQt5 import QtWidgets,uic
 from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton
 from PyQt5.Qt import pyqtSignal
-
+from ResourcePath import resource_path
 from CustomTableView import TableViewer
 from ValidacionesGrupo import ValidarClaveGrupo
-from pysqlcipher3 import dbapi2 as sqlite
+
 
 class GrupoBorrar(QDialog):
     close_signal=pyqtSignal()
 
     def __init__(self,DBconnection):
         super(GrupoBorrar,self).__init__()  
-        uic.loadUi("../UI/EliminarGrupos.ui",self)
+        uic.loadUi(resource_path("UI/EliminarGrupos.ui"),self)
         self.con=DBconnection
         self.cursor=DBconnection.cursor()
         self.input1=self.findChild(QLineEdit,"Grupo")
@@ -39,8 +39,9 @@ class GrupoBorrar(QDialog):
         for child in self.findChildren(QLineEdit):
             child.clear()
     def VerificarDatos(self,Grupo):
-        Mensaje,Errores=ValidarClaveGrupo(Grupo)
-        if Errores>0:
+        Mensaje=""
+        Mensaje=ValidarClaveGrupo(Grupo)
+        if Mensaje!="":
             Mensajes.MostrarErroresBorrar(Mensaje)
             return False
         else:

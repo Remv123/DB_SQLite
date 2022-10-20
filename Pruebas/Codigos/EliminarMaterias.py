@@ -6,7 +6,7 @@ import sys,Mensajes,sqlite3
 from PyQt5 import QtWidgets,uic
 from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton
 from PyQt5.Qt import pyqtSignal
-
+from ResourcePath import resource_path
 from CustomTableView import TableViewer
 from ValidacionesMaterias import ValidarEliminacionMaterias
 
@@ -16,7 +16,7 @@ class MateriasBorrar(QDialog):
 
     def __init__(self,DBconnection):
         super(MateriasBorrar,self).__init__()
-        uic.loadUi("../UI/EliminarMateria.ui",self)
+        uic.loadUi(resource_path("UI/EliminarMateria.ui"),self)
         self.con=DBconnection
         self.cursor=DBconnection.cursor()
         self.Clave=self.findChild(QLineEdit,"Clave")
@@ -43,12 +43,13 @@ class MateriasBorrar(QDialog):
             
     def ValidarDatos(self,Abreviatura):
         mensaje=""
-        errores=0
+       
         if len(Abreviatura)==0:
             mensaje+="El campo esta vacio\n"
-            errores+=1
-        mensaje,errores=ValidarEliminacionMaterias(Abreviatura, mensaje, errores, self.cursor)
-        if errores>0:
+           
+        else:
+            mensaje=ValidarEliminacionMaterias(Abreviatura, mensaje, self.cursor)
+        if mensaje!="":
             Mensajes.MostrarErroresBorrar(mensaje)
             return False
         else:

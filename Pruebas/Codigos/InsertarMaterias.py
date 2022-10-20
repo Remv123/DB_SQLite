@@ -5,23 +5,23 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton,QComboBox
 from PyQt5.Qt import pyqtSignal
-
 import sys,sqlite3
 from CustomTableView import TableViewer
 from ValidacionesMaterias import ValidarMaterias
 import Mensajes
-
+from ResourcePath import resource_path
 class Materia(QDialog):
     close_signal=pyqtSignal()
     def __init__(self,DBconnection):
         super(Materia,self).__init__()
-        uic.loadUi("../UI/Materias.ui",self)
+        uic.loadUi(resource_path("UI/Materias.ui"),self)
         self.con=DBconnection
         self.cursor=DBconnection.cursor()
         self.input1=self.findChild(QLineEdit,"Clave")
         self.input2=self.findChild(QLineEdit,"Nombre")
-        self.input3=self.findChild(QLineEdit,"Semestre")
+        self.input3=self.findChild(QComboBox,"Semestre")
         self.input4=self.findChild(QComboBox,"Departamento")
+        self.input5=self.findChild(QComboBox,"Trimestre")
         self.button1=self.findChild(QPushButton, "Insertar")
         self.button1.clicked.connect(self.InsertarValoresMaterias)
         self.button2=self.findChild(QPushButton,"Imprimir")
@@ -35,12 +35,13 @@ class Materia(QDialog):
     def InsertarValoresMaterias(self):
         clave=self.input1.text()
         Nombre=self.input2.text()
-        Semestre=self.input3.text()
+        Semestre=self.input3.currentText()
         Departamento=self.input4.currentText()
+        Trimestre=self.input5.currentText()
         oracion="""insert or ignore into Materias(CveMateria,
-        NombreMateria,SemestreMateria,DepartamentoMateria) values(?,?,?,?)"""
+        NombreMateria,SemestreMateria,DepartamentoMateria,Trimestre) values(?,?,?,?,?)"""
         if self.ValidarDatos(clave,Nombre,Semestre):
-            self.cursor.execute(oracion,(clave,Nombre,Semestre,Departamento))
+            self.cursor.execute(oracion,(clave,Nombre,Semestre,Departamento,Trimestre))
             self.con.commit()
             self.ClearLineEdits()
             Mensajes.MostrarExito()
@@ -52,19 +53,17 @@ class Materia(QDialog):
     
     def ValidarDatos(self,clave,nombre,semestre):
         mensaje=""
-        errores=0
         if len(clave)==0  or len(nombre)==0 or len(semestre)==0:
-            errores+=1
             mensaje="Existe algun campo vacio\n"
-        mensaje,errores=ValidarMaterias(clave, nombre, semestre, errores, mensaje)
-        if errores>0:
+        else:
+            mensaje,errores=ValidarMaterias(clave, nombre, semestre,  mensaje)
+        if mensaje!="":
             Mensajes.MostrarErroresInsercion(mensaje)
             return False
         else:
             return True
             
-    def __exit__(self):
-        self.con.close()
+
     def VerTabla(self):
         self.TV=TableViewer("Materias",self.cursor)
         self.TV.setWindowTitle("Materias")

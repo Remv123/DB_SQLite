@@ -7,12 +7,12 @@ from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton
 from CustomTableView import TableViewer
 from ValidacionesGrupo import ValidarClaveGrupo
 import sqlite3,Mensajes,sys
-
+from ResourcePath import resource_path
 class Grupo(QDialog):
     close_signal=pyqtSignal()
     def __init__(self,DBconnection):
         super(Grupo, self).__init__()
-        uic.loadUi("../UI/Grupos.ui",self)
+        uic.loadUi(resource_path("UI/Grupos.ui"),self)
         self.con=DBconnection
         self.cursor=DBconnection.cursor()
 
@@ -47,9 +47,9 @@ class Grupo(QDialog):
             child.clear()
     def ValidarGrupo(self,Grupo):
         Mensaje=""
-        Errores=0
-        Mensaje,Errores=ValidarClaveGrupo(Grupo)
-        if Errores>0:
+     
+        Mensaje=ValidarClaveGrupo(Grupo)
+        if Mensaje!="":
             Mensajes.MostrarErroresInsercion(Mensaje)
             return False
         else:
@@ -72,7 +72,7 @@ class Grupo(QDialog):
         
     
 if __name__=="__main__":
-    con=sqlite3.Connection("../DB/ESM.db")
+    con=sqlite3.Connection("../DB/ESM_pruebas.db")
     app=QtWidgets.QApplication(sys.argv)
     window=Grupo(con)
     window.show()

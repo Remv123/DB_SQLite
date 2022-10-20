@@ -4,8 +4,6 @@
 
 from PyQt5 import QtWidgets,uic
 from PyQt5.QtCore import QThread
-from PyQt5.Qt import pyqtSignal
-
 from PyQt5.QtWidgets import QInputDialog,QProgressDialog
 from PyQt5.QtWidgets import QFileDialog,QMenu,QMessageBox,QAction,QLineEdit,QPushButton,QMainWindow
 from Exportar import ExportarAExcel
@@ -24,12 +22,13 @@ from EliminarUsuario import EliminarUsuario
 from ValidacionesCuentas import ValidarFecha
 from ValidacionesMaterias import ValidarTrimestreMaterias
 from Respaldar import RespaldarArchivoDB
+from ResourcePath import resource_path
 import sys,sqlite3
 
 class MainWindow(QMainWindow):
     def __init__(self,DBconnection,Name):
         super(MainWindow,self).__init__()
-        uic.loadUi("../UI/Menuprincipal.ui",self) #Carga la interfaz grafica con el nombre especificado
+        uic.loadUi(resource_path("UI/Menuprincipal.ui"),self) #Carga la interfaz grafica con el nombre especificado
         self.con=DBconnection
         self.createWindows()
         self.Window=None
@@ -155,9 +154,9 @@ class MainWindow(QMainWindow):
         cursor1.execute("Pragma database_list")
         NombreDB=cursor1.fetchone()[2]
         periodo,ok=QInputDialog().getText(self,"Semestre que se quiere exportar","Semestre:",QLineEdit.Normal)
-        MensajeError,Errores=ValidarFecha(periodo, MensajeError, Errores)
+        MensajeError=ValidarFecha(periodo, MensajeError)
         Trimestre,ok=QInputDialog().getText(self,"Trimestre que se quiere exportar","Trimestre:",QLineEdit.Normal)
-        MensajeError,Errores=ValidarTrimestreMaterias(Trimestre, MensajeError, Errores)
+        MensajeError=ValidarTrimestreMaterias(Trimestre, MensajeError)
         mensaje=QMessageBox()
         if Errores ==0:
             nombre,extension=QFileDialog.getSaveFileName(self,"Nombre del archivo",filter="*.xlsx")
@@ -181,7 +180,7 @@ class MainWindow(QMainWindow):
     
     
     def OperacionIniciada(self):
-        self.BarraProgreso=QProgressDialog("Respaldando",None, 0, 0)
+        self.BarraProgreso=QProgressDialog("Operacion",None, 0, 0)
         self.BarraProgreso.setWindowTitle("Iniciando operacion")
         self.BarraProgreso.setWindowTitle("Realizando operacion")
         self.BarraProgreso.show()

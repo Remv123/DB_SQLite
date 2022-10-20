@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sqlite3
-def RespaldarArchivoDB(DBName,DBBackupName):
+def RespaldarArchivoDB(DBName:str,DBBackupName:str):
     conexion=sqlite3.connect(DBName)
     conexion2=sqlite3.connect(DBBackupName)
     with conexion2:

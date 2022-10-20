@@ -5,10 +5,10 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QDialog,QLineEdit,QPushButton
 from PyQt5.Qt import pyqtSignal
-
+from ResourcePath import resource_path
 from CustomTableView import TableViewer
 from ValidacionesAlumnos import ValidarBoleta
-from ValidacionesCuentas import ValidarUsuario,ValidarFecha,VerificarBoletaCuenta,VerificarUsuarioCuenta
+from ValidacionesCuentas import VerificarBoletaCuenta,VerificarUsuarioCuenta
 import sys,sqlite3,secrets,string,Mensajes
 
 class Cuentas(QDialog):
@@ -16,14 +16,11 @@ class Cuentas(QDialog):
 
     def __init__(self,DBConnection):
         super(Cuentas,self).__init__()
-        uic.loadUi("../UI/Cuentas.ui",self)
-        
+        uic.loadUi(resource_path("UI/Cuentas.ui"),self)
         self.con=DBConnection
         self.cursor=DBConnection.cursor()
         self.input1=self.findChild(QLineEdit,"Boleta")
-        self.input2=self.findChild(QLineEdit,"Usuario")
         self.input3=self.findChild(QLineEdit,"Contrasena")
-        self.input4=self.findChild(QLineEdit,"Fecha")
         self.button1=self.findChild(QPushButton,"Generar")
         self.button1.clicked.connect(self.GenerarContrasena)
         self.button2=self.findChild(QPushButton,"Insertar")
@@ -36,18 +33,17 @@ class Cuentas(QDialog):
 
     
     def GenerarContrasena(self):
+        longitud=6 
         alphabet= string.ascii_lowercase+string.digits+string.punctuation
-        password=''.join(secrets.choice(alphabet) for i in range(6))
+        password=''.join(secrets.choice(alphabet) for i in range(longitud))
         self.input3.setText(password)
         
     def InsertarDatosCuenta(self):
         Boleta=self.input1.text()
-        Usuario=self.input2.text()
         Contrasena=self.input3.text()
-        Fecha=self.input4.text()
-        oracion="""insert or ignore into Cuenta(CveAlumno,NombreCuenta,Contrasena,Semestre) values(?,?,?,?)"""
-        if  self.VerificarDatos(Boleta, Usuario, Contrasena, Fecha):
-            self.cursor.execute(oracion,(Boleta,Usuario,Contrasena,Fecha))
+        oracion="""insert or ignore into Cuenta(CveAlumno,NombreCuenta,Contrasena) values(?,?,?)"""
+        if  self.VerificarDatos(Boleta, Contrasena):
+            self.cursor.execute(oracion,(Boleta,Boleta,Contrasena))
             self.con.commit()
             self.ClearLineEdits()
             Mensajes.MostrarExito()
@@ -55,28 +51,21 @@ class Cuentas(QDialog):
         for child in self.findChildren(QLineEdit):
             child.clear()
     
-    def VerificarDatos(self,Boleta,Usuario,Contrasena,Fecha):
-        errores=0
+    def VerificarDatos(self,Boleta,Contrasena):
         Mensaje=""
-        if len(Boleta)==0 or len(Usuario)==0 or len(Contrasena)==0 or len(Fecha)==0:
+        if len(Boleta)==0  or len(Contrasena)==0:
             Mensaje+="Existen campos sin llenar\n"
-            errores+=1
-        Mensaje,errores=ValidarBoleta(Boleta, Mensaje, errores)
-        Mensaje,errores=ValidarUsuario(Usuario, Mensaje, errores)
-        Mensaje,errroes=ValidarFecha(Fecha, Mensaje, errores)
-        Mensaje, errores=VerificarBoletaCuenta(Boleta, Mensaje,errores,self.con)
-        Mensaje, errores=VerificarUsuarioCuenta(Boleta,Fecha,Mensaje,errores,self.con)
-        if errores>0:
+          
+        else:
+            Mensaje=ValidarBoleta(Boleta, Mensaje)
+            Mensaje=VerificarBoletaCuenta(Boleta, Mensaje,self.con)
+            Mensaje=VerificarUsuarioCuenta(Boleta,Mensaje,self.con)
+        if Mensaje!="":
             Mensajes.MostrarErroresInsercion(Mensaje)
             return False
         else:
             return True
             
- 
-   
-    
-    
-   
      
     def VerCuentas(self):
         self.TV=TableViewer("Cuenta", self.cursor)
@@ -86,6 +75,7 @@ class Cuentas(QDialog):
           self.TV.show()
     def closeEvent(self,event):
         self.on_close()
+    
     def on_close(self):
         if self.TV is not None:
             self.TV.close()

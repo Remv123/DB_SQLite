@@ -4,16 +4,16 @@
 from PyQt5 import uic,QtWidgets
 from PyQt5.QtWidgets import QLineEdit,QPushButton,QDialog,QApplication
 from PyQt5.Qt import pyqtSignal
-
+from ValidacionesUsuario import ValidarUsuarioApliacion
 from CustomTableView import TableViewer 
 import sys,sqlite3,Mensajes
-
+from ResourcePath import resource_path
 class RegistrarUsuario(QDialog):
     close_signal=pyqtSignal()
 
     def __init__(self,DBconn):
         super(RegistrarUsuario, self).__init__()
-        uic.loadUi("../UI/Usuarios.ui",self)
+        uic.loadUi(resource_path("UI/Usuarios.ui"),self)
         self.con=DBconn
         self.Cursor=DBconn.cursor()
         self.Usuario=self.findChild(QLineEdit,"Usuario")
@@ -29,11 +29,23 @@ class RegistrarUsuario(QDialog):
         Usuario=self.Usuario.text()
         password=self.Password.text()
         oracion="insert or ignore into Usuarios values(?,?)"
-        self.Cursor.execute(oracion,(Usuario,password))
-        self.con.commit()
-        self.ClearLineEdits()
-        Mensajes.MostrarExito()
+        if self.ValidarUsuario(Usuario,password):
+            self.Cursor.execute(oracion,(Usuario,password))
+            self.con.commit()
+            self.ClearLineEdits()
+            Mensajes.MostrarExito()
         
+    
+    def ValidarUsuario(self,Usuario,password):
+        Mensaje=""
+        Mensaje=ValidarUsuarioApliacion(Usuario, password, Mensaje)
+        if Mensaje!="":
+            Mensajes.MostrarErroresInsercion(Mensaje)
+            return False
+        else:
+            return True
+        
+
     
     def ClearLineEdits(self):
         for child in self.findChildren(QLineEdit):

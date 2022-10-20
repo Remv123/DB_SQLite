@@ -5,13 +5,13 @@ import sys
 from PyQt5 import uic,QtWidgets
 from PyQt5.QtWidgets import QFileDialog,QMessageBox,QMainWindow,QLineEdit,QPushButton
 import sqlite3
-from VerificarUsuario import VerificarUsuario
+from ValidacionesUsuario import VerificarUsuario
 from Menu import MainWindow
-
+from ResourcePath import resource_path
 class ConexionDB(QMainWindow):
     def __init__(self):
         super(ConexionDB,self).__init__()
-        uic.loadUi("../UI/Conexion.ui",self)
+        uic.loadUi(resource_path("UI/Conexion.ui"),self)
        
         self.Usuario=self.findChild(QLineEdit,"Usuario")
         self.Contrasena=self.findChild(QLineEdit,"Contrasena")
@@ -34,11 +34,6 @@ class ConexionDB(QMainWindow):
         
         
     
-   
-        
-   
-        
-        
     
 if __name__ =="__main__":           
     if not QtWidgets.QApplication.instance():
